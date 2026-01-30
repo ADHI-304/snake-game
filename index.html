@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern Snake Game built with HTML5 Canvas">
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🐍 Snake</h1>
+            <div class="header-right">
+                <div class="score-container">
+                    <div class="score-box">
+                        <span class="score-label">Score</span>
+                        <span id="score" class="score-value">0</span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-label">Best</span>
+                        <span id="high-score" class="score-value">0</span>
+                    </div>
+                </div>
+                <button id="settings-btn" class="icon-btn" aria-label="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-icon">⚡</span>
+                <span class="stat-label">Speed</span>
+                <span id="speed-level" class="stat-value">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">📏</span>
+                <span class="stat-label">Length</span>
+                <span id="snake-length" class="stat-value">3</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <span class="stat-label">Time</span>
+                <span id="game-time" class="stat-value">0:00</span>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- Pause Indicator -->
+            <div id="pause-indicator" class="pause-indicator hidden">
+                <span>⏸️ PAUSED</span>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="game-over-screen" class="overlay hidden">
+                <div class="overlay-content">
+                    <h2>Game Over</h2>
+                    <div class="game-stats">
+                        <div class="stat-row">
+                            <span>Score</span>
+                            <span id="final-score">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Length</span>
+                            <span id="final-length">3</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Time</span>
+                            <span id="final-time">0:00</span>
+                        </div>
+                    </div>
+                    <div id="new-high-score" class="new-record hidden">🏆 New High Score!</div>
+
+                    <div class="speed-selector">
+                        <span class="speed-label">Speed</span>
+                        <div class="speed-options" id="gameover-speed-options">
+                            <button class="speed-btn" data-speed="easy">Easy</button>
+                            <button class="speed-btn active" data-speed="normal">Normal</button>
+                            <button class="speed-btn" data-speed="hard">Hard</button>
+                        </div>
+                    </div>
+                    <button id="restart-btn" class="btn-primary">
+                        <span>Play Again</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Start Screen -->
+            <div id="start-screen" class="overlay">
+                <div class="overlay-content">
+                    <h2>Ready to Play?</h2>
+                    <p>Use arrow keys or WASD to move</p>
+                    <p class="sub-hint">Press Space or P to pause</p>
+
+                    <div class="speed-selector">
+                        <span class="speed-label">Speed</span>
+                        <div class="speed-options" id="start-speed-options">
+                            <button class="speed-btn" data-speed="easy">Easy</button>
+                            <button class="speed-btn active" data-speed="normal">Normal</button>
+                            <button class="speed-btn" data-speed="hard">Hard</button>
+                        </div>
+                    </div>
+
+                    <button id="start-btn" class="btn-primary">
+                        <span>Start Game</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Settings</h3>
+                    <button id="close-settings" class="icon-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="settings-group">
+                    <label class="settings-label">Theme</label>
+                    <div class="theme-grid">
+                        <button class="theme-btn" data-theme="dark" title="Dark">
+                            <span class="theme-preview dark-preview"></span>
+                            <span class="theme-name">Dark</span>
+                        </button>
+                        <button class="theme-btn" data-theme="light" title="Light">
+                            <span class="theme-preview light-preview"></span>
+                            <span class="theme-name">Light</span>
+                        </button>
+                        <button class="theme-btn" data-theme="neon" title="Neon">
+                            <span class="theme-preview neon-preview"></span>
+                            <span class="theme-name">Neon</span>
+                        </button>
+                        <button class="theme-btn" data-theme="retro" title="Retro">
+                            <span class="theme-preview retro-preview"></span>
+                            <span class="theme-name">Retro</span>
+                        </button>
+                        <button class="theme-btn" data-theme="ocean" title="Ocean">
+                            <span class="theme-preview ocean-preview"></span>
+                            <span class="theme-name">Ocean</span>
+                        </button>
+                        <button class="theme-btn" data-theme="forest" title="Forest">
+                            <span class="theme-preview forest-preview"></span>
+                            <span class="theme-name">Forest</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label class="settings-label">Options</label>
+                    <div class="toggle-row">
+                        <span>Sound Effects</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="sound-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <span>Show Grid</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="grid-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <span>Particle Effects</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="particles-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <button id="reset-scores" class="btn-secondary">
+                        <span>Reset High Score</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-info">
+            <div class="key-hint">
+                <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>
+                <span>or</span>
+                <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+                <span>|</span>
+                <kbd>Space</kbd>
+                <span>Pause</span>
+            </div>
+            <p>Collect food to grow and increase your score!</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
