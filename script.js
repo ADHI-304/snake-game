@@ -19,15 +19,19 @@ let isGameRunning = false;
 let isPaused = false;
 let lastRenderTime = 0;
 let difficulty = 'normal';
+let gameMode = 'classic'; // classic, nowalls, maze, speedrun
 let gameStartTime = 0;
 let elapsedTime = 0;
 let particles = [];
+let obstacles = []; // For maze mode
+let speedRunTime = 60; // Seconds for speed run mode
+let speedRunTimer = null;
 
 // Settings
 let settings = {
     theme: 'dark',
     sound: true,
-    showGrid: true,
+    showGrid: false,
     particles: true
 };
 
@@ -56,6 +60,7 @@ const resetScoresBtn = document.getElementById('reset-scores');
 const soundToggle = document.getElementById('sound-toggle');
 const gridToggle = document.getElementById('grid-toggle');
 const particlesToggle = document.getElementById('particles-toggle');
+const homeBtn = document.getElementById('home-btn');
 
 // Initialize
 function init() {
@@ -73,10 +78,13 @@ function init() {
     closeSettingsBtn.addEventListener('click', closeSettings);
     settingsModal.querySelector('.modal-backdrop').addEventListener('click', closeSettings);
     setupSpeedButtons();
+    setupModeButtons();
     setupThemeButtons();
     setupToggles();
     resetScoresBtn.addEventListener('click', resetHighScore);
     setupTouchControls();
+    createSpeedRunTimer();
+    homeBtn.addEventListener('click', goHome);
 }
 
 function resizeCanvas() {
@@ -125,6 +133,24 @@ function setupSpeedButtons() {
             difficulty = btn.dataset.speed;
         });
     });
+}
+
+function setupModeButtons() {
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll(`.mode-btn[data-mode="${btn.dataset.mode}"]`).forEach(b => b.classList.add('active'));
+            gameMode = btn.dataset.mode;
+        });
+    });
+}
+
+function createSpeedRunTimer() {
+    const timerDiv = document.createElement('div');
+    timerDiv.id = 'speedrun-timer';
+    timerDiv.className = 'speedrun-timer hidden';
+    timerDiv.textContent = '60';
+    document.querySelector('.canvas-wrapper').appendChild(timerDiv);
 }
 
 function setupToggles() {
@@ -217,6 +243,7 @@ function startGame() {
     isPaused = false;
     gameStartTime = Date.now();
     lastRenderTime = 0;
+    if (gameMode === 'speedrun') startSpeedRunTimer();
     requestAnimationFrame(gameLoopHandler);
 }
 
@@ -228,6 +255,7 @@ function restartGame() {
     isPaused = false;
     gameStartTime = Date.now();
     lastRenderTime = 0;
+    if (gameMode === 'speedrun') startSpeedRunTimer();
     requestAnimationFrame(gameLoopHandler);
 }
 
@@ -239,11 +267,110 @@ function resetGame() {
     nextDirection = { x: 1, y: 0 };
     score = 0;
     particles = [];
+    obstacles = [];
     const diff = DIFFICULTY_SETTINGS[difficulty];
     gameSpeed = diff.speed;
     updateScore();
     updateStats();
+
+    // Generate maze obstacles if in maze mode
+    if (gameMode === 'maze') {
+        generateMaze();
+    }
+
+    // Setup speed run timer
+    const timerEl = document.getElementById('speedrun-timer');
+    if (gameMode === 'speedrun') {
+        speedRunTime = 60;
+        timerEl.textContent = speedRunTime;
+        timerEl.classList.remove('hidden', 'warning');
+    } else {
+        timerEl.classList.add('hidden');
+        if (speedRunTimer) {
+            clearInterval(speedRunTimer);
+            speedRunTimer = null;
+        }
+    }
+
     spawnFood();
+}
+
+function generateMaze() {
+    const gridWidth = Math.floor(canvas.width / GRID_SIZE);
+    const gridHeight = Math.floor(canvas.height / GRID_SIZE);
+    obstacles = [];
+
+    const centerX = Math.floor(gridWidth / 2);
+    const centerY = Math.floor(gridHeight / 2);
+
+    // Create obstacles away from center where snake starts
+    // Snake starts at center and moves right, so we need clear space there
+    const patterns = [
+        // Corner blocks (far from center)
+        { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 2, y: 3 },
+        { x: gridWidth - 3, y: 2 }, { x: gridWidth - 4, y: 2 }, { x: gridWidth - 3, y: 3 },
+        { x: 2, y: gridHeight - 3 }, { x: 3, y: gridHeight - 3 }, { x: 2, y: gridHeight - 4 },
+        { x: gridWidth - 3, y: gridHeight - 3 }, { x: gridWidth - 4, y: gridHeight - 3 }, { x: gridWidth - 3, y: gridHeight - 4 },
+
+        // Top edge obstacles
+        { x: Math.floor(gridWidth / 3), y: 3 },
+        { x: Math.floor(gridWidth / 3) + 1, y: 3 },
+        { x: Math.floor(2 * gridWidth / 3), y: 3 },
+        { x: Math.floor(2 * gridWidth / 3) - 1, y: 3 },
+
+        // Bottom edge obstacles
+        { x: Math.floor(gridWidth / 3), y: gridHeight - 4 },
+        { x: Math.floor(gridWidth / 3) + 1, y: gridHeight - 4 },
+        { x: Math.floor(2 * gridWidth / 3), y: gridHeight - 4 },
+        { x: Math.floor(2 * gridWidth / 3) - 1, y: gridHeight - 4 },
+
+        // Left side obstacles (away from center)
+        { x: 3, y: Math.floor(gridHeight / 3) },
+        { x: 3, y: Math.floor(gridHeight / 3) + 1 },
+        { x: 3, y: Math.floor(2 * gridHeight / 3) },
+        { x: 3, y: Math.floor(2 * gridHeight / 3) - 1 },
+
+        // Right side obstacles (away from center)
+        { x: gridWidth - 4, y: Math.floor(gridHeight / 3) },
+        { x: gridWidth - 4, y: Math.floor(gridHeight / 3) + 1 },
+        { x: gridWidth - 4, y: Math.floor(2 * gridHeight / 3) },
+        { x: gridWidth - 4, y: Math.floor(2 * gridHeight / 3) - 1 },
+    ];
+
+    // Filter out any obstacles that might be too close to the snake starting position
+    // Snake starts at centerX, centerY and extends left 2 cells, moving right
+    patterns.forEach(obs => {
+        // Create a safe zone around the center (5 cells in each direction)
+        const isTooClose = Math.abs(obs.x - centerX) <= 5 && Math.abs(obs.y - centerY) <= 2;
+        if (!isTooClose && obs.x >= 0 && obs.x < gridWidth && obs.y >= 0 && obs.y < gridHeight) {
+            obstacles.push(obs);
+        }
+    });
+}
+
+function goHome() {
+    // Stop the game and return to start screen
+    isGameRunning = false;
+    isPaused = false;
+
+    // Clear speed run timer if active
+    if (speedRunTimer) {
+        clearInterval(speedRunTimer);
+        speedRunTimer = null;
+    }
+    document.getElementById('speedrun-timer').classList.add('hidden');
+
+    // Hide game over screen if visible
+    gameOverScreen.classList.add('hidden');
+    newHighScoreElement.classList.add('hidden');
+    pauseIndicator.classList.add('hidden');
+
+    // Show start screen
+    startScreen.classList.remove('hidden');
+
+    // Reset display
+    score = 0;
+    updateScore();
 }
 
 function gameLoopHandler(currentTime) {
@@ -255,13 +382,53 @@ function gameLoopHandler(currentTime) {
     draw();
 }
 
+function startSpeedRunTimer() {
+    if (speedRunTimer) clearInterval(speedRunTimer);
+    speedRunTimer = setInterval(() => {
+        if (!isGameRunning || isPaused) return;
+        speedRunTime--;
+        const timerEl = document.getElementById('speedrun-timer');
+        timerEl.textContent = speedRunTime;
+
+        if (speedRunTime <= 10) {
+            timerEl.classList.add('warning');
+        }
+
+        if (speedRunTime <= 0) {
+            clearInterval(speedRunTimer);
+            speedRunTimer = null;
+            gameOver();
+        }
+    }, 1000);
+}
+
 function update() {
     direction = { ...nextDirection };
-    const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+    let head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+    // Handle wrap-around for "No Walls" mode
+    if (gameMode === 'nowalls') {
+        const gridWidth = canvas.width / GRID_SIZE;
+        const gridHeight = canvas.height / GRID_SIZE;
+        if (head.x < 0) head.x = gridWidth - 1;
+        if (head.x >= gridWidth) head.x = 0;
+        if (head.y < 0) head.y = gridHeight - 1;
+        if (head.y >= gridHeight) head.y = 0;
+    }
+
     if (checkCollision(head)) { gameOver(); return; }
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
         score += 10;
+        // Bonus points for maze mode
+        if (gameMode === 'maze') score += 5;
+        // Add time in speed run mode
+        if (gameMode === 'speedrun') {
+            speedRunTime += 5;
+            const timerEl = document.getElementById('speedrun-timer');
+            timerEl.textContent = speedRunTime;
+            if (speedRunTime > 10) timerEl.classList.remove('warning');
+        }
         updateScore();
         if (settings.particles) createParticles(food.x * GRID_SIZE + GRID_SIZE / 2, food.y * GRID_SIZE + GRID_SIZE / 2);
         playSound('eat');
@@ -277,24 +444,44 @@ function update() {
 function checkCollision(head) {
     const gridWidth = canvas.width / GRID_SIZE;
     const gridHeight = canvas.height / GRID_SIZE;
-    if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) return true;
+
+    // Wall collision (only in classic and maze mode)
+    if (gameMode === 'classic' || gameMode === 'maze' || gameMode === 'speedrun') {
+        if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) return true;
+    }
+
+    // Self collision (all modes)
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) return true;
     }
+
+    // Obstacle collision (maze mode)
+    if (gameMode === 'maze') {
+        for (const obs of obstacles) {
+            if (head.x === obs.x && head.y === obs.y) return true;
+        }
+    }
+
     return false;
 }
 
 function spawnFood() {
     const gridWidth = canvas.width / GRID_SIZE;
     const gridHeight = canvas.height / GRID_SIZE;
-    let newFood, isOnSnake;
+    let newFood, isOnSnake, isOnObstacle;
     do {
         isOnSnake = false;
+        isOnObstacle = false;
         newFood = { x: Math.floor(Math.random() * gridWidth), y: Math.floor(Math.random() * gridHeight) };
         for (const seg of snake) {
             if (seg.x === newFood.x && seg.y === newFood.y) { isOnSnake = true; break; }
         }
-    } while (isOnSnake);
+        if (gameMode === 'maze') {
+            for (const obs of obstacles) {
+                if (obs.x === newFood.x && obs.y === newFood.y) { isOnObstacle = true; break; }
+            }
+        }
+    } while (isOnSnake || isOnObstacle);
     food = newFood;
 }
 
@@ -350,9 +537,40 @@ function draw() {
     ctx.fillStyle = style.getPropertyValue('--canvas-bg').trim();
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (settings.showGrid) drawGrid(style);
+    if (gameMode === 'maze') drawObstacles(style);
     drawParticles();
     drawFood(style);
     drawSnake(style);
+}
+
+function drawObstacles(style) {
+    const obstacleColor = style.getPropertyValue('--text-secondary').trim();
+    obstacles.forEach(obs => {
+        const x = obs.x * GRID_SIZE;
+        const y = obs.y * GRID_SIZE;
+        const padding = 1;
+        const size = GRID_SIZE - padding * 2;
+
+        // Draw obstacle with gradient
+        const grad = ctx.createLinearGradient(x, y, x + size, y + size);
+        grad.addColorStop(0, obstacleColor);
+        grad.addColorStop(1, 'rgba(100, 100, 100, 0.8)');
+
+        ctx.fillStyle = grad;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 5;
+        roundRect(ctx, x + padding, y + padding, size, size, 3);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Add brick pattern
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + padding, y + GRID_SIZE / 2);
+        ctx.lineTo(x + size, y + GRID_SIZE / 2);
+        ctx.stroke();
+    });
 }
 
 function drawGrid(style) {
@@ -466,6 +684,14 @@ function playSound(type) {
 function gameOver() {
     isGameRunning = false;
     playSound('die');
+
+    // Clear speed run timer
+    if (speedRunTimer) {
+        clearInterval(speedRunTimer);
+        speedRunTimer = null;
+    }
+    document.getElementById('speedrun-timer').classList.add('hidden');
+
     finalScoreElement.textContent = score;
     finalLengthElement.textContent = snake.length;
     finalTimeElement.textContent = gameTimeElement.textContent;

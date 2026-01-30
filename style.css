@@ -439,6 +439,110 @@ body {
     border-color: var(--accent-primary);
 }
 
+/* Mode Selector */
+.mode-selector {
+    margin-bottom: 20px;
+}
+
+.mode-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.mode-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, rgba(0, 212, 170, 0.15), rgba(0, 255, 136, 0.1));
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.mode-icon {
+    font-size: 1.3rem;
+}
+
+.mode-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Speed Run Timer */
+.speedrun-timer {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(255, 100, 100, 0.9), rgba(255, 50, 50, 0.9));
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 100, 100, 0.4);
+    z-index: 5;
+    animation: timerPulse 1s ease-in-out infinite;
+}
+
+.speedrun-timer.warning {
+    animation: timerWarning 0.5s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+
+    0%,
+    100% {
+        transform: translateX(-50%) scale(1);
+    }
+
+    50% {
+        transform: translateX(-50%) scale(1.02);
+    }
+}
+
+@keyframes timerWarning {
+
+    0%,
+    100% {
+        transform: translateX(-50%) scale(1);
+        background: linear-gradient(135deg, rgba(255, 50, 50, 0.95), rgba(200, 0, 0, 0.95));
+    }
+
+    50% {
+        transform: translateX(-50%) scale(1.05);
+        background: linear-gradient(135deg, rgba(255, 100, 100, 0.95), rgba(255, 50, 50, 0.95));
+    }
+}
+
 .btn-primary {
     display: inline-flex;
     align-items: center;
