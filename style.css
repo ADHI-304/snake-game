@@ -989,11 +989,6 @@ kbd {
         font-size: 0.85rem;
     }
 
-    /* Show touch controls on tablet/larger mobile */
-    .touch-controls {
-        display: flex;
-    }
-
     .controls-info {
         display: none;
     }
