@@ -829,6 +829,98 @@ kbd {
     display: none !important;
 }
 
+/* Touch Controls for Mobile */
+.touch-controls {
+    display: none;
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 6px;
+    width: 150px;
+    height: 150px;
+}
+
+.dpad-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.dpad-btn:active {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    transform: scale(0.95);
+    border-color: var(--accent-primary);
+}
+
+.dpad-btn.up {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.dpad-btn.left {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.dpad-btn.center {
+    grid-column: 2;
+    grid-row: 2;
+    background: transparent;
+    border: none;
+}
+
+.dpad-btn.right {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.dpad-btn.down {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.touch-pause-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: var(--glass-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-left: 24px;
+    align-self: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.touch-pause-btn:active {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    transform: scale(0.95);
+}
+
+/* Responsive Styles */
 @media (max-width: 540px) {
     body {
         padding: 16px;
@@ -895,5 +987,469 @@ kbd {
     .speed-btn {
         padding: 8px 16px;
         font-size: 0.85rem;
+    }
+
+    /* Show touch controls on tablet/larger mobile */
+    .touch-controls {
+        display: flex;
+    }
+
+    .controls-info {
+        display: none;
+    }
+
+    .icon-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Smaller mobile phones */
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+        min-height: 100dvh;
+    }
+
+    .game-container {
+        gap: 10px;
+    }
+
+    .header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .header h1 {
+        font-size: 1.3rem;
+    }
+
+    .header-right {
+        gap: 8px;
+    }
+
+    .score-container {
+        gap: 8px;
+    }
+
+    .score-box {
+        padding: 5px 10px;
+        min-width: 55px;
+        border-radius: 10px;
+    }
+
+    .score-label {
+        font-size: 0.6rem;
+    }
+
+    .score-value {
+        font-size: 1.1rem;
+    }
+
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .icon-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .stats-bar {
+        gap: 12px;
+        padding: 8px 10px;
+        border-radius: 10px;
+    }
+
+    .stat-icon {
+        font-size: 0.9rem;
+    }
+
+    .stat-value {
+        font-size: 0.8rem;
+    }
+
+    .canvas-wrapper {
+        padding: 6px;
+        border-radius: 14px;
+    }
+
+    #gameCanvas {
+        border-radius: 8px;
+    }
+
+    .overlay-content {
+        padding: 20px 12px;
+        max-width: 280px;
+    }
+
+    .overlay-content h2 {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+    }
+
+    .overlay-content p {
+        font-size: 0.9rem;
+    }
+
+    .overlay-content .sub-hint {
+        font-size: 0.8rem;
+        margin-bottom: 16px;
+    }
+
+    .mode-selector {
+        margin-bottom: 16px;
+    }
+
+    .mode-label,
+    .speed-label {
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+    }
+
+    .mode-options {
+        gap: 6px;
+    }
+
+    .mode-btn {
+        padding: 10px 6px;
+        border-radius: 8px;
+    }
+
+    .mode-icon {
+        font-size: 1.1rem;
+    }
+
+    .mode-name {
+        font-size: 0.6rem;
+    }
+
+    .speed-selector {
+        margin-bottom: 20px;
+    }
+
+    .speed-options {
+        gap: 6px;
+    }
+
+    .speed-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        border-radius: 10px;
+        gap: 8px;
+    }
+
+    .btn-primary svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .game-stats {
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+    }
+
+    .stat-row {
+        padding: 6px 0;
+        font-size: 0.85rem;
+    }
+
+    .new-record {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+    }
+
+    /* Touch controls adjustments */
+    .dpad {
+        width: 130px;
+        height: 130px;
+        gap: 4px;
+    }
+
+    .dpad-btn {
+        font-size: 1.2rem;
+        border-radius: 10px;
+    }
+
+    .touch-pause-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+        margin-left: 16px;
+    }
+
+    /* Modal adjustments */
+    .modal {
+        padding: 12px;
+    }
+
+    .modal-content {
+        padding: 20px 16px;
+        border-radius: 16px;
+        max-height: 85vh;
+    }
+
+    .modal-header {
+        margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+        font-size: 1.3rem;
+    }
+
+    .settings-group {
+        margin-bottom: 20px;
+    }
+
+    .settings-label {
+        font-size: 0.7rem;
+        margin-bottom: 10px;
+    }
+
+    .theme-grid {
+        gap: 8px;
+    }
+
+    .theme-btn {
+        padding: 10px 8px;
+        border-radius: 10px;
+    }
+
+    .theme-preview {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+
+    .theme-name {
+        font-size: 0.65rem;
+    }
+
+    .toggle-row {
+        padding: 10px 0;
+        font-size: 0.9rem;
+    }
+
+    .toggle {
+        width: 44px;
+        height: 24px;
+    }
+
+    .toggle-slider::before {
+        height: 18px;
+        width: 18px;
+    }
+
+    .toggle input:checked+.toggle-slider::before {
+        transform: translateX(20px);
+    }
+
+    .btn-secondary {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+
+    /* Pause indicator */
+    .pause-indicator {
+        padding: 12px 24px;
+        border-radius: 10px;
+    }
+
+    .pause-indicator span {
+        font-size: 1rem;
+    }
+
+    /* Speed run timer */
+    .speedrun-timer {
+        padding: 6px 16px;
+        font-size: 1rem;
+        top: 16px;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+    body {
+        padding: 8px;
+    }
+
+    .header h1 {
+        font-size: 1.1rem;
+    }
+
+    .score-box {
+        padding: 4px 8px;
+        min-width: 48px;
+    }
+
+    .score-label {
+        font-size: 0.55rem;
+    }
+
+    .score-value {
+        font-size: 1rem;
+    }
+
+    .icon-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .stats-bar {
+        gap: 8px;
+        padding: 6px 8px;
+    }
+
+    .stat-icon {
+        font-size: 0.8rem;
+    }
+
+    .stat-value {
+        font-size: 0.75rem;
+        min-width: 24px;
+    }
+
+    .canvas-wrapper {
+        padding: 4px;
+    }
+
+    .overlay-content {
+        padding: 16px 10px;
+        max-width: 260px;
+    }
+
+    .overlay-content h2 {
+        font-size: 1.1rem;
+    }
+
+    .mode-btn {
+        padding: 8px 4px;
+    }
+
+    .mode-icon {
+        font-size: 1rem;
+    }
+
+    .mode-name {
+        font-size: 0.55rem;
+    }
+
+    .speed-btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+
+    .btn-primary {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+
+    .dpad {
+        width: 110px;
+        height: 110px;
+        gap: 3px;
+    }
+
+    .dpad-btn {
+        font-size: 1rem;
+        border-radius: 8px;
+    }
+
+    .touch-pause-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+        margin-left: 12px;
+    }
+
+    .modal-content {
+        padding: 16px 12px;
+    }
+
+    .modal-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .theme-grid {
+        gap: 6px;
+    }
+
+    .theme-btn {
+        padding: 8px 6px;
+    }
+
+    .theme-preview {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+    body {
+        padding: 8px;
+    }
+
+    .game-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        max-width: none;
+    }
+
+    .header {
+        order: 1;
+        width: auto;
+    }
+
+    .stats-bar {
+        order: 2;
+        width: auto;
+    }
+
+    .canvas-wrapper {
+        order: 3;
+    }
+
+    .touch-controls {
+        order: 4;
+        margin-top: 0;
+        margin-left: 12px;
+    }
+
+    .controls-info {
+        display: none;
+    }
+
+    .dpad {
+        width: 100px;
+        height: 100px;
+    }
+
+    .touch-pause-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        margin-left: 10px;
+    }
+}
+
+/* Prevent pull-to-refresh on mobile */
+@media (pointer: coarse) {
+
+    html,
+    body {
+        overscroll-behavior: none;
     }
 }

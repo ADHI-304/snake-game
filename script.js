@@ -185,6 +185,7 @@ function resetHighScore() {
 }
 
 function setupTouchControls() {
+    // Swipe controls on canvas
     let touchStartX = 0, touchStartY = 0;
     canvas.addEventListener('touchstart', (e) => {
         touchStartX = e.touches[0].clientX;
@@ -202,6 +203,55 @@ function setupTouchControls() {
             else if (diffY < -30 && direction.y !== 1) nextDirection = { x: 0, y: -1 };
         }
     }, { passive: true });
+
+    // D-pad button controls
+    const dpadUp = document.getElementById('dpad-up');
+    const dpadDown = document.getElementById('dpad-down');
+    const dpadLeft = document.getElementById('dpad-left');
+    const dpadRight = document.getElementById('dpad-right');
+    const touchPause = document.getElementById('touch-pause');
+
+    if (dpadUp) {
+        dpadUp.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (isGameRunning && !isPaused && direction.y !== 1) {
+                nextDirection = { x: 0, y: -1 };
+            }
+        }, { passive: false });
+    }
+
+    if (dpadDown) {
+        dpadDown.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (isGameRunning && !isPaused && direction.y !== -1) {
+                nextDirection = { x: 0, y: 1 };
+            }
+        }, { passive: false });
+    }
+
+    if (dpadLeft) {
+        dpadLeft.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (isGameRunning && !isPaused && direction.x !== 1) {
+                nextDirection = { x: -1, y: 0 };
+            }
+        }, { passive: false });
+    }
+
+    if (dpadRight) {
+        dpadRight.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (isGameRunning && !isPaused && direction.x !== -1) {
+                nextDirection = { x: 1, y: 0 };
+            }
+        }, { passive: false });
+    }
+
+    if (touchPause) {
+        touchPause.addEventListener('click', () => {
+            if (isGameRunning) togglePause();
+        });
+    }
 }
 
 function handleKeyPress(e) {
